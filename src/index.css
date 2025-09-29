@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+
+@media print {
+
+    /* Hide everything except the ticket and its content */
+    body * {
+        visibility: hidden;
+    }
+
+    #print-area,
+    #print-area * {
+        visibility: visible;
+    }
+
+    #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* Hide the print/close buttons on the ticket itself */
+    .no-print {
+        display: none !important;
+    }
+}

@@ -1,0 +1,82 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.env
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Tauri builds and artifacts
+src-tauri/target/
+src-tauri/Cargo.lock
+src-tauri/gen/
+*.deb
+*.rpm
+*.dmg
+*.msi
+*.exe
+*.app
+*.AppImage
+
+# Tauri WiX artifacts (Windows installer)
+src-tauri/WixTools/
+src-tauri/*.wixobj
+src-tauri/*.wixpdb
+
+# Database files (local data)
+database.json
+*.db
+*.sqlite
+*.sqlite3
+
+# Operating system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store?
+.Spotlight-V100
+.Trashes
+Icon?
+._*
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.#*
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/.ropeproject
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Backup files
+*.backup
+*.bak
+*.orig

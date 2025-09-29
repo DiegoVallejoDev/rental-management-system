@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { MaintenanceRecord, Equipment } from '../types';
-import { useTranslation } from '../contexts/TranslationContext';
+import { useTranslation } from '../hooks/useTranslation';
+import { formatTranslation } from '../utils/translations';
 
 interface MaintenanceFormProps {
     onSave: (maintenanceData: Omit<MaintenanceRecord, 'id'>) => void;
@@ -37,7 +38,7 @@ export function MaintenanceForm({ onSave, onClose, equipment, maintenanceToEdit 
         if (maintenanceToEdit) {
             setFormData({
                 equipmentId: maintenanceToEdit.equipmentId,
-                quantity: maintenanceToEdit.quantity,
+                quantity: maintenanceToEdit.quantity || 1,
                 reason: maintenanceToEdit.reason,
                 startDate: maintenanceToEdit.startDate,
                 expectedReturnDate: maintenanceToEdit.expectedReturnDate || '',
@@ -50,29 +51,64 @@ export function MaintenanceForm({ onSave, onClose, equipment, maintenanceToEdit 
     }, [maintenanceToEdit]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'number' ? parseFloat(value) || 0 : value,
-        }));
+        const { name, value } = e.target;
+
+        setFormData(prev => {
+            const newData = { ...prev };
+
+            if (name === 'equipmentId') {
+                newData.equipmentId = parseInt(value) || 0;
+                newData.quantity = 1; // Reset quantity when equipment changes
+            } else if (name === 'quantity') {
+                newData.quantity = Math.max(1, parseInt(value) || 1);
+            } else if (name === 'cost') {
+                newData.cost = parseFloat(value) || 0;
+            } else if (name === 'reason') {
+                newData.reason = value;
+            } else if (name === 'startDate') {
+                newData.startDate = value;
+            } else if (name === 'expectedReturnDate') {
+                newData.expectedReturnDate = value;
+            } else if (name === 'actualReturnDate') {
+                newData.actualReturnDate = value;
+            } else if (name === 'status') {
+                newData.status = value as 'In Maintenance' | 'Completed';
+            } else if (name === 'notes') {
+                newData.notes = value;
+            }
+
+            return newData;
+        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (formData.equipmentId === 0 || !formData.reason.trim()) {
-            alert('Please fill in all required fields');
+            alert(t.fillRequiredFields);
+            return;
+        }
+
+        if (formData.quantity <= 0) {
+            alert(t.quantityMustBeGreaterThanZero);
             return;
         }
 
         const selectedEquipment = equipment.find(eq => eq.id === formData.equipmentId);
         if (!selectedEquipment) {
-            alert('Please select valid equipment');
+            alert(t.selectValidEquipment);
             return;
         }
 
-        // Check if we have enough available stock for new maintenance
-        if (!maintenanceToEdit && formData.quantity > selectedEquipment.availableStock) {
-            alert(`Only ${selectedEquipment.availableStock} units available for maintenance`);
+        // Check if we have enough available stock for maintenance
+        const isEditing = maintenanceToEdit && maintenanceToEdit.id > 0;
+        const originalQuantity = isEditing ? (maintenanceToEdit.quantity || 0) : 0;
+        const availableForThisMaintenance = selectedEquipment.availableStock + originalQuantity;
+
+        if (formData.quantity > availableForThisMaintenance) {
+            const message = formatTranslation(t.notEnoughStockForMaintenance, {
+                availableStock: availableForThisMaintenance.toString()
+            });
+            alert(message);
             return;
         }
 
@@ -100,7 +136,7 @@ export function MaintenanceForm({ onSave, onClose, equipment, maintenanceToEdit 
                             className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
                             required
                         >
-                            <option value={0}>Seleccionar equipo...</option>
+                            <option value={0}>{t.selectEquipment}</option>
                             {equipment.map(eq => (
                                 <option key={eq.id} value={eq.id}>
                                     {eq.name} ({t.availableStock}: {eq.availableStock})
@@ -118,8 +154,12 @@ export function MaintenanceForm({ onSave, onClose, equipment, maintenanceToEdit 
                             name="quantity"
                             id="quantity"
                             min="1"
-                            max={formData.equipmentId ? getAvailableStock(formData.equipmentId) : 1}
-                            value={formData.quantity}
+                            max={formData.equipmentId ? (
+                                maintenanceToEdit && maintenanceToEdit.id > 0 ?
+                                    getAvailableStock(formData.equipmentId) + (maintenanceToEdit.quantity || 0) :
+                                    getAvailableStock(formData.equipmentId)
+                            ) : 1}
+                            value={formData.quantity || 1}
                             onChange={handleInputChange}
                             className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
                             required
@@ -137,7 +177,6 @@ export function MaintenanceForm({ onSave, onClose, equipment, maintenanceToEdit 
                         id="reason"
                         value={formData.reason}
                         onChange={handleInputChange}
-                        placeholder="e.g., Reparación general, Cambio de aceite, etc."
                         className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
                         required
                     />
@@ -235,7 +274,6 @@ export function MaintenanceForm({ onSave, onClose, equipment, maintenanceToEdit 
                         value={formData.notes}
                         onChange={handleInputChange}
                         className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
-                        placeholder="Detalles adicionales, observaciones, etc."
                     />
                 </div>
 

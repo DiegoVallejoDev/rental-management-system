@@ -68,10 +68,15 @@ export interface Translations {
   addNewClient: string;
   editClient: string;
   clientName: string;
+  fullName: string;
   phone: string;
+  phoneNumber: string;
   address: string;
+  addressOptional: string;
+  name: string;
   noClientsYet: string;
   deleteClientConfirm: string;
+  saveClient: string;
 
   // Settings
   businessConfiguration: string;
@@ -94,21 +99,59 @@ export interface Translations {
   // Rental Form
   createRental: string;
   selectClient: string;
+  selectAClient: string;
   rentalType: string;
+  rentalTypeLabel: string;
   hourly: string;
   daily: string;
+  byHour: string;
+  byDay: string;
   startDate: string;
+  startDateTime: string;
+  returnDateTime: string;
   selectEquipment: string;
   quantity: string;
   unitPrice: string;
   subtotal: string;
   addEquipment: string;
   removeEquipment: string;
+  step: string;
+  next: string;
+  back: string;
+  available: string;
+  selected: string;
+  setDatesAndConfirm: string;
+  summary: string;
+  items: string;
+  confirmRental: string;
 
   // Status
   active: string;
   returned: string;
   overdue: string;
+
+  // Validation messages
+  fillRequiredFields: string;
+  quantityMustBeGreaterThanZero: string;
+  selectValidEquipment: string;
+  notEnoughStockForMaintenance: string;
+
+  // Rental Ticket
+  close: string;
+  printNote: string;
+  rentalNote: string;
+  date: string;
+  tel: string;
+  qty: string;
+  description: string;
+  unitPriceHeader: string;
+  subtotalHeader: string;
+  start: string;
+  return: string;
+  termsAndConditions: string;
+  clientSignature: string;
+  unknownItem: string;
+  ticketFolio: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -183,10 +226,15 @@ export const translations: Record<Language, Translations> = {
     addNewClient: "+ Agregar Nuevo Cliente",
     editClient: "Editar Cliente",
     clientName: "Nombre del Cliente",
+    fullName: "Nombre Completo",
     phone: "Teléfono",
+    phoneNumber: "Número de Teléfono",
     address: "Dirección",
+    addressOptional: "Dirección (Opcional)",
+    name: "Nombre",
     noClientsYet: "No se han agregado clientes aún.",
     deleteClientConfirm: "¿Está seguro de que desea eliminar este cliente?",
+    saveClient: "Guardar Cliente",
 
     // Settings
     businessConfiguration: "Configuración del Negocio",
@@ -211,21 +259,61 @@ export const translations: Record<Language, Translations> = {
     // Rental Form
     createRental: "Crear Nueva Renta",
     selectClient: "Seleccionar Cliente",
+    selectAClient: "Seleccionar un cliente",
     rentalType: "Tipo de Renta",
+    rentalTypeLabel: "Tipo de Renta",
     hourly: "Por Hora",
     daily: "Por Día",
+    byHour: "Por Hora",
+    byDay: "Por Día",
     startDate: "Fecha de Inicio",
+    startDateTime: "Fecha y Hora de Inicio",
+    returnDateTime: "Fecha y Hora de Devolución",
     selectEquipment: "Seleccionar Equipo",
     quantity: "Cantidad",
     unitPrice: "Precio Unitario",
     subtotal: "Subtotal",
     addEquipment: "Agregar Equipo",
     removeEquipment: "Remover Equipo",
+    step: "Paso",
+    next: "Siguiente",
+    back: "Atrás",
+    available: "Disponible",
+    selected: "Seleccionado",
+    setDatesAndConfirm: "Establecer Fechas y Confirmar",
+    summary: "Resumen",
+    items: "Artículos",
+    confirmRental: "Confirmar Renta",
 
     // Status
     active: "Activo",
     returned: "Devuelto",
     overdue: "Vencido",
+
+    // Validation messages
+    fillRequiredFields: "Por favor complete todos los campos requeridos",
+    quantityMustBeGreaterThanZero: "La cantidad debe ser mayor que 0",
+    selectValidEquipment: "Por favor seleccione un equipo válido",
+    notEnoughStockForMaintenance:
+      "Solo {availableStock} unidades disponibles para mantenimiento",
+
+    // Rental Ticket
+    close: "Cerrar",
+    printNote: "Imprimir Nota",
+    rentalNote: "NOTA DE RENTA",
+    date: "Fecha",
+    tel: "Tel",
+    qty: "CANT",
+    description: "DESCRIPCIÓN",
+    unitPriceHeader: "PRECIO UNIT",
+    subtotalHeader: "SUBTOTAL",
+    start: "INICIO",
+    return: "DEVOLUCIÓN",
+    termsAndConditions:
+      "Se aplican términos y condiciones. El cliente es responsable de cualquier daño o pérdida del equipo.",
+    clientSignature: "Firma del Cliente",
+    unknownItem: "Artículo Desconocido",
+    ticketFolio: "Ticket Folio",
   },
   en: {
     // Common
@@ -298,10 +386,15 @@ export const translations: Record<Language, Translations> = {
     addNewClient: "+ Add New Client",
     editClient: "Edit Client",
     clientName: "Client Name",
+    fullName: "Full Name",
     phone: "Phone",
+    phoneNumber: "Phone Number",
     address: "Address",
+    addressOptional: "Address (Optional)",
+    name: "Name",
     noClientsYet: "No clients have been added yet.",
     deleteClientConfirm: "Are you sure you want to delete this client?",
+    saveClient: "Save Client",
 
     // Settings
     businessConfiguration: "Business Configuration",
@@ -324,20 +417,60 @@ export const translations: Record<Language, Translations> = {
     // Rental Form
     createRental: "Create New Rental",
     selectClient: "Select Client",
+    selectAClient: "Select a client",
     rentalType: "Rental Type",
+    rentalTypeLabel: "Rental Type",
     hourly: "Hourly",
     daily: "Daily",
+    byHour: "By Hour",
+    byDay: "By Day",
     startDate: "Start Date",
+    startDateTime: "Start Date & Time",
+    returnDateTime: "Return Date & Time",
     selectEquipment: "Select Equipment",
     quantity: "Quantity",
     unitPrice: "Unit Price",
     subtotal: "Subtotal",
     addEquipment: "Add Equipment",
     removeEquipment: "Remove Equipment",
+    step: "Step",
+    next: "Next",
+    back: "Back",
+    available: "Available",
+    selected: "Selected",
+    setDatesAndConfirm: "Set Dates and Confirm",
+    summary: "Summary",
+    items: "Items",
+    confirmRental: "Confirm Rental",
 
     // Status
     active: "Active",
     returned: "Returned",
     overdue: "Overdue",
+
+    // Validation messages
+    fillRequiredFields: "Please fill in all required fields",
+    quantityMustBeGreaterThanZero: "Quantity must be greater than 0",
+    selectValidEquipment: "Please select valid equipment",
+    notEnoughStockForMaintenance:
+      "Only {availableStock} units available for maintenance",
+
+    // Rental Ticket
+    close: "Close",
+    printNote: "Print Note",
+    rentalNote: "RENTAL NOTE",
+    date: "Date",
+    tel: "Tel",
+    qty: "QTY",
+    description: "DESCRIPTION",
+    unitPriceHeader: "UNIT PRICE",
+    subtotalHeader: "SUBTOTAL",
+    start: "START",
+    return: "RETURN",
+    termsAndConditions:
+      "Terms and conditions apply. Renter is responsible for any damage or loss of equipment.",
+    clientSignature: "Client Signature",
+    unknownItem: "Unknown Item",
+    ticketFolio: "Ticket Folio",
   },
 };

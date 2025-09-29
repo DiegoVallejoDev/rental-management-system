@@ -3,7 +3,7 @@ import type { AppSettings } from '../types';
 import { save, open } from '@tauri-apps/plugin-dialog';
 import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
 import { downloadDir } from '@tauri-apps/api/path';
-import { useTranslation } from '../contexts/TranslationContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SettingsProps {
     settings: AppSettings;

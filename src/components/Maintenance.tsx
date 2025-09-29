@@ -1,6 +1,7 @@
 import type { MaintenanceRecord, Equipment } from '../types';
 import { format } from 'date-fns';
-import { useTranslation, formatTranslation } from '../contexts/TranslationContext';
+import { useTranslation } from '../hooks/useTranslation';
+import { formatTranslation } from '../utils/translations';
 
 interface MaintenanceProps {
     maintenance: MaintenanceRecord[];
@@ -79,7 +80,7 @@ export function Maintenance({ maintenance, equipment, onAdd, onEdit, onComplete 
                                         {record.expectedReturnDate ? format(new Date(record.expectedReturnDate), 'MMM dd, yyyy') : '-'}
                                     </td>
                                     <td className="py-3 px-4">
-                                        <span className={`px-3 py-1 text-xs font-bold rounded-full shadow ${getStatusColor(record.status)}`}>
+                                        <span className={`px-3 py-1 text-xs font-bold rounded-full shadow whitespace-nowrap ${getStatusColor(record.status)}`}>
                                             {record.status === 'In Maintenance' ? t.inMaintenance : t.maintenanceCompleted}
                                         </span>
                                     </td>

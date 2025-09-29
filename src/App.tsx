@@ -14,7 +14,8 @@ import { Rentals } from './components/Rentals';
 import { RentalTicket } from './components/RentalTicket';
 import { Settings } from './components/Settings';
 import { loadDatabase, saveDatabase } from './services/database';
-import { TranslationProvider, useTranslation } from './contexts/TranslationContext';
+import { TranslationProvider } from './contexts/TranslationContext';
+import { useTranslation } from './hooks/useTranslation';
 
 
 interface AppContentProps {
@@ -149,7 +150,8 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
       cost: 0,
       notes: ''
     };
-    setEditingMaintenance(newMaintenance as MaintenanceRecord);
+    // Create a temporary maintenance record with a negative ID to indicate it's new
+    setEditingMaintenance({ ...newMaintenance, id: -1 });
     setIsMaintenanceModalOpen(true);
   };
 
@@ -157,11 +159,13 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
     if (!db) return;
     let newMaintenanceList: MaintenanceRecord[];
 
-    if (editingMaintenance) {
+    if (editingMaintenance && editingMaintenance.id > 0) {
+      // Editing existing maintenance record
       newMaintenanceList = db.maintenance.map(m =>
         m.id === editingMaintenance.id ? { ...m, ...maintenanceData } : m
       );
     } else {
+      // Creating new maintenance record
       const newId = (db.maintenance.length > 0) ? Math.max(...db.maintenance.map(m => m.id)) + 1 : 1;
       newMaintenanceList = [...db.maintenance, { ...maintenanceData, id: newId }];
     }
@@ -250,13 +254,13 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
       {/* Ticket Modal */}
       {isTicketModalOpen && selectedRental && selectedClient && db && (
         <div id="print-area">
-          <Modal isOpen={isTicketModalOpen} onClose={() => setIsTicketModalOpen(false)} title={`Ticket Folio #${selectedRental.folio}`}>
+          <Modal isOpen={isTicketModalOpen} onClose={() => setIsTicketModalOpen(false)} title={`${t.ticketFolio} #${selectedRental.folio}`}>
             <RentalTicket rental={selectedRental} settings={db.settings} client={selectedClient} equipmentList={db.equipment} onClose={() => setIsTicketModalOpen(false)} />
           </Modal>
         </div>
       )}
       <footer className="mt-12 py-6 text-center text-xs text-gray-400 opacity-80 select-none">
-        <span>Rental Management System &copy; <a href='https://github.com/DiegoVallejoDev/'>Diego Vallejo</a>{new Date().getFullYear()} &mdash; Powered by Tauri + React</span>
+        <span>Rental Management System &copy; <a href='https://github.com/DiegoVallejoDev/'>Diego Vallejo</a> {' '} {new Date().getFullYear()} &mdash; Powered by Tauri + React</span>
       </footer>
     </div>
   );

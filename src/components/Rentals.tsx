@@ -1,6 +1,7 @@
 import type { Client, Rental } from '../types';
 import { format, isPast } from 'date-fns';
-import { useTranslation, formatTranslation } from '../contexts/TranslationContext';
+import { useTranslation } from '../hooks/useTranslation';
+import { formatTranslation } from '../utils/translations';
 
 interface RentalsProps {
     rentals: Rental[];

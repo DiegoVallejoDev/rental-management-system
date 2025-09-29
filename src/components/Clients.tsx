@@ -1,4 +1,5 @@
 import type { Client as ClientType } from '../types';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ClientsProps {
     clients: ClientType[];
@@ -8,28 +9,29 @@ interface ClientsProps {
 }
 
 export function Clients({ clients, onAdd, onEdit, onDelete }: ClientsProps) {
+    const { t } = useTranslation();
     return (
         <div className="w-full max-w-6xl mx-auto bg-gray-900 rounded-lg p-8 shadow-lg">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-cyan-400">Clients</h1>
+                <h1 className="text-3xl font-bold text-cyan-400">{t.clientsTitle}</h1>
                 <button onClick={onAdd} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md">
-                    + Add New Client
+                    {t.addNewClient}
                 </button>
             </div>
             <div className="overflow-x-auto">
                 <table className="min-w-full bg-gray-800 rounded-lg">
                     <thead className="bg-gray-950">
                         <tr>
-                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300">Name</th>
-                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300">Phone</th>
-                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300 hidden md:table-cell">Address</th>
-                            <th className="text-right py-3 px-4 text-sm font-semibold text-gray-300">Actions</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300">{t.name}</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300">{t.phone}</th>
+                            <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300 hidden md:table-cell">{t.address}</th>
+                            <th className="text-right py-3 px-4 text-sm font-semibold text-gray-300">{t.actions}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {clients.length === 0 && (
                             <tr>
-                                <td colSpan={4} className="text-center py-6 text-gray-400">No clients have been added yet.</td>
+                                <td colSpan={4} className="text-center py-6 text-gray-400">{t.noClientsYet}</td>
                             </tr>
                         )}
                         {clients.map((client) => (
@@ -39,8 +41,8 @@ export function Clients({ clients, onAdd, onEdit, onDelete }: ClientsProps) {
                                 <td className="py-3 px-4 text-gray-300 hidden md:table-cell">{client.address}</td>
                                 <td className="py-3 px-4 text-right">
                                     <div className="flex justify-end gap-3">
-                                        <button onClick={() => onEdit(client)} className="text-blue-400 hover:text-blue-300 text-sm font-semibold">Edit</button>
-                                        <button onClick={() => onDelete(client.id)} className="text-red-400 hover:text-red-300 text-sm font-semibold">Delete</button>
+                                        <button onClick={() => onEdit(client)} className="text-blue-400 hover:text-blue-300 text-sm font-semibold">{t.edit}</button>
+                                        <button onClick={() => onDelete(client.id)} className="text-red-400 hover:text-red-300 text-sm font-semibold">{t.delete}</button>
                                     </div>
                                 </td>
                             </tr>

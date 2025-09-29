@@ -1,5 +1,6 @@
 import type { Equipment as EquipmentType } from '../types';
-import { useTranslation, formatTranslation } from '../contexts/TranslationContext';
+import { useTranslation } from '../hooks/useTranslation';
+import { formatTranslation } from '../utils/translations';
 
 interface EquipmentProps {
     equipment: EquipmentType[];

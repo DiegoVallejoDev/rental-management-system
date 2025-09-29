@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { relaunch } from '@tauri-apps/plugin-process';
-
+import { version } from '../package.json'; 
 import type { AppSettings, Database, Equipment as EquipmentType, Client as ClientType, Rental, MaintenanceRecord } from './types';
 import { ClientForm } from './components/ClientForm';
 import { Clients } from './components/Clients';
@@ -210,7 +210,7 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl md:text-3xl font-extrabold tracking-tight text-white drop-shadow-lg">Rental Manager</span>
-            <span className="hidden md:inline-block px-3 py-1 rounded-full bg-cyan-600/80 text-xs font-semibold ml-2">v1.1</span>
+            <span className="hidden md:inline-block px-3 py-1 rounded-full bg-cyan-600/80 text-xs font-semibold ml-2">v{version}</span>
           </div>
           <nav className="flex gap-2 mt-4 md:mt-0">
             <NavButton view="rentals" label={t.rentals} />

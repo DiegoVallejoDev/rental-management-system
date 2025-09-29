@@ -66,5 +66,8 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
 
+      - name: Install Rust dependencies
+        run: cargo fetch --manifest-path src-tauri/Cargo.toml
+
       - name: Build application
         run: pnpm tauri build

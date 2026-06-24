@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { relaunch } from '@tauri-apps/plugin-process';
-import { version } from '../package.json'; 
-import type { AppSettings, Database, Equipment as EquipmentType, Client as ClientType, Rental, MaintenanceRecord } from './types';
+import { version } from '../package.json';
+import type { AppSettings, AuditEvent, Client as ClientType, Database, Equipment as EquipmentType, MaintenanceRecord, Rental } from './types';
 import { ClientForm } from './components/ClientForm';
 import { Clients } from './components/Clients';
+import { Dashboard } from './components/Dashboard';
 import { Equipment } from './components/Equipment';
 import { EquipmentForm } from './components/EquipmentForm';
 import { Maintenance } from './components/Maintenance';
@@ -13,10 +14,10 @@ import { RentalForm } from './components/RentalForm';
 import { Rentals } from './components/Rentals';
 import { RentalTicket } from './components/RentalTicket';
 import { Settings } from './components/Settings';
+import { applyAvailableStock, buildRentalQuantityByEquipmentId, getNextId } from './domain/selectors';
 import { loadDatabase, saveDatabase } from './services/database';
 import { TranslationProvider } from './contexts/TranslationContext';
 import { useTranslation } from './hooks/useTranslation';
-
 
 interface AppContentProps {
   db: Database | null;
@@ -24,11 +25,12 @@ interface AppContentProps {
   onDbUpdate: (newDb: Database) => void;
 }
 
+type View = 'dashboard' | 'rentals' | 'equipment' | 'clients' | 'settings' | 'maintenance';
+
 function AppContent({ db, error, onDbUpdate }: AppContentProps) {
-  const [currentView, setCurrentView] = useState<string>('rentals');
+  const [currentView, setCurrentView] = useState<View>('dashboard');
   const { t } = useTranslation();
 
-  // Modal States
   const [isEquipmentModalOpen, setIsEquipmentModalOpen] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState<EquipmentType | null>(null);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -43,93 +45,113 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
     await relaunch();
   };
 
-  // ... all other handlers (updateAndSaveDb, handleSaveSettings, etc.) are the same
+  const withAudit = (
+    newDbState: Database,
+    type: AuditEvent['type'],
+    entityId: number,
+    summary: string
+  ): Database => ({
+    ...newDbState,
+    auditLog: [
+      ...(newDbState.auditLog || []),
+      {
+        id: getNextId(newDbState.auditLog || []),
+        type,
+        entityId,
+        summary,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+  });
 
   const updateAndSaveDb = (newDbState: Database) => {
-    // Update available stock for equipment before saving
-    const updatedEquipment = newDbState.equipment.map(equipment => {
-      const inMaintenanceQuantity = newDbState.maintenance
-        .filter(m => m.equipmentId === equipment.id && m.status === 'In Maintenance')
-        .reduce((sum, m) => sum + m.quantity, 0);
-
-      return {
-        ...equipment,
-        availableStock: equipment.stock - inMaintenanceQuantity
-      };
-    });
-
-    const finalDbState = { ...newDbState, equipment: updatedEquipment };
+    const finalDbState = applyAvailableStock(newDbState);
     onDbUpdate(finalDbState);
     saveDatabase(finalDbState);
   };
 
   const handleSaveSettings = async (newSettings: AppSettings) => {
     if (!db) return;
-    updateAndSaveDb({ ...db, settings: newSettings });
+    updateAndSaveDb(withAudit({ ...db, settings: newSettings }, 'settings.updated', newSettings.id, 'Updated business settings'));
   };
 
   const handleSaveEquipment = (equipmentData: Omit<EquipmentType, 'id'> & { id?: number }) => {
     if (!db) return;
+    const entityId = equipmentData.id ?? getNextId(db.equipment);
     let newEquipmentList: EquipmentType[];
+
     if (equipmentData.id) {
       newEquipmentList = db.equipment.map(item => item.id === equipmentData.id ? { ...item, ...equipmentData } as EquipmentType : item);
     } else {
-      const newId = (db.equipment.length > 0) ? Math.max(...db.equipment.map(e => e.id)) + 1 : 1;
-      newEquipmentList = [...db.equipment, { ...equipmentData, id: newId }];
+      newEquipmentList = [...db.equipment, { ...equipmentData, id: entityId }];
     }
-    updateAndSaveDb({ ...db, equipment: newEquipmentList });
+
+    updateAndSaveDb(withAudit({ ...db, equipment: newEquipmentList }, 'equipment.saved', entityId, `Saved equipment: ${equipmentData.name}`));
     setIsEquipmentModalOpen(false);
   };
 
   const handleDeleteEquipment = (equipmentId: number) => {
-    if (!db || !window.confirm('Are you sure you want to delete this item?')) return;
-    updateAndSaveDb({ ...db, equipment: db.equipment.filter(item => item.id !== equipmentId) });
+    if (!db || !window.confirm(t.deleteEquipmentConfirm)) return;
+    const equipment = db.equipment.find(item => item.id === equipmentId);
+    updateAndSaveDb(withAudit({ ...db, equipment: db.equipment.filter(item => item.id !== equipmentId) }, 'equipment.deleted', equipmentId, `Deleted equipment: ${equipment?.name ?? equipmentId}`));
   };
 
   const handleSaveClient = (clientData: Omit<ClientType, 'id'> & { id?: number }) => {
     if (!db) return;
+    const entityId = clientData.id ?? getNextId(db.clients);
     let newClientsList: ClientType[];
+
     if (clientData.id) {
-      newClientsList = db.clients.map(c => c.id === clientData.id ? { ...c, ...clientData } as ClientType : c);
+      newClientsList = db.clients.map(client => client.id === clientData.id ? { ...client, ...clientData } as ClientType : client);
     } else {
-      const newId = (db.clients.length > 0) ? Math.max(...db.clients.map(c => c.id)) + 1 : 1;
-      newClientsList = [...db.clients, { ...clientData, id: newId }];
+      newClientsList = [...db.clients, { ...clientData, id: entityId }];
     }
-    updateAndSaveDb({ ...db, clients: newClientsList });
+
+    updateAndSaveDb(withAudit({ ...db, clients: newClientsList }, 'client.saved', entityId, `Saved client: ${clientData.name}`));
     setIsClientModalOpen(false);
   };
 
   const handleDeleteClient = (clientId: number) => {
-    if (!db || !window.confirm('Are you sure you want to delete this client?')) return;
-    updateAndSaveDb({ ...db, clients: db.clients.filter(c => c.id !== clientId) });
+    if (!db || !window.confirm(t.deleteClientConfirm)) return;
+    const client = db.clients.find(item => item.id === clientId);
+    updateAndSaveDb(withAudit({ ...db, clients: db.clients.filter(item => item.id !== clientId) }, 'client.deleted', clientId, `Deleted client: ${client?.name ?? clientId}`));
   };
 
   const handleSaveRental = (rentalData: Omit<Rental, 'id' | 'folio' | 'status' | 'total'>, total: number) => {
     if (!db) return;
+
     const folio = db.settings.nextInvoiceNumber;
+    const detailQuantityByEquipmentId = buildRentalQuantityByEquipmentId(rentalData.details);
     const updatedSettings = { ...db.settings, nextInvoiceNumber: folio + 1 };
-    const updatedEquipment = db.equipment.map(equip => {
-      const rentedItem = rentalData.details.find(d => d.equipmentId === equip.id);
-      if (rentedItem) { return { ...equip, stock: equip.stock - rentedItem.quantity }; }
-      return equip;
-    });
-    const newId = (db.rentals.length > 0) ? Math.max(...db.rentals.map(r => r.id)) + 1 : 1;
-    const newRental: Rental = { ...rentalData, id: newId, folio: folio, total: total, status: 'Active' };
-    updateAndSaveDb({ ...db, settings: updatedSettings, equipment: updatedEquipment, rentals: [...db.rentals, newRental] });
+    const updatedEquipment = db.equipment.map(equipment => ({
+      ...equipment,
+      stock: equipment.stock - (detailQuantityByEquipmentId.get(equipment.id) ?? 0),
+    }));
+    const newRental: Rental = {
+      ...rentalData,
+      id: getNextId(db.rentals),
+      folio,
+      total,
+      status: 'Active',
+    };
+
+    updateAndSaveDb(withAudit({ ...db, settings: updatedSettings, equipment: updatedEquipment, rentals: [...db.rentals, newRental] }, 'rental.created', newRental.id, `Created rental #${folio}`));
     setIsRentalModalOpen(false);
   };
 
   const handleReturnRental = (rentalId: number) => {
     if (!db) return;
-    const rentalToReturn = db.rentals.find(r => r.id === rentalId);
+    const rentalToReturn = db.rentals.find(rental => rental.id === rentalId);
     if (!rentalToReturn || rentalToReturn.status === 'Returned') return;
-    const updatedEquipment = db.equipment.map(equip => {
-      const returnedItem = rentalToReturn.details.find(d => d.equipmentId === equip.id);
-      if (returnedItem) { return { ...equip, stock: equip.stock + returnedItem.quantity }; }
-      return equip;
-    });
-    const updatedRentals = db.rentals.map(r => r.id === rentalId ? { ...r, status: 'Returned' as const } : r);
-    updateAndSaveDb({ ...db, equipment: updatedEquipment, rentals: updatedRentals });
+
+    const detailQuantityByEquipmentId = buildRentalQuantityByEquipmentId(rentalToReturn.details);
+    const updatedEquipment = db.equipment.map(equipment => ({
+      ...equipment,
+      stock: equipment.stock + (detailQuantityByEquipmentId.get(equipment.id) ?? 0),
+    }));
+    const updatedRentals = db.rentals.map(rental => rental.id === rentalId ? { ...rental, status: 'Returned' as const } : rental);
+
+    updateAndSaveDb(withAudit({ ...db, equipment: updatedEquipment, rentals: updatedRentals }, 'rental.returned', rentalId, `Returned rental #${rentalToReturn.folio}`));
   };
 
   const handleViewTicket = (rental: Rental) => {
@@ -138,8 +160,8 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
   };
 
   const handleSendToMaintenance = (equipment: EquipmentType) => {
-    // Create a new maintenance record with equipment pre-selected
-    const newMaintenance: Omit<MaintenanceRecord, 'id'> = {
+    setEditingMaintenance({
+      id: -1,
       equipmentId: equipment.id,
       quantity: 1,
       reason: '',
@@ -148,41 +170,31 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
       actualReturnDate: '',
       status: 'In Maintenance',
       cost: 0,
-      notes: ''
-    };
-    // Create a temporary maintenance record with a negative ID to indicate it's new
-    setEditingMaintenance({ ...newMaintenance, id: -1 });
+      notes: '',
+    });
     setIsMaintenanceModalOpen(true);
   };
 
   const handleSaveMaintenance = (maintenanceData: Omit<MaintenanceRecord, 'id'>) => {
     if (!db) return;
-    let newMaintenanceList: MaintenanceRecord[];
+    const entityId = editingMaintenance && editingMaintenance.id > 0 ? editingMaintenance.id : getNextId(db.maintenance);
+    const newMaintenanceList = editingMaintenance && editingMaintenance.id > 0
+      ? db.maintenance.map(record => record.id === editingMaintenance.id ? { ...record, ...maintenanceData } : record)
+      : [...db.maintenance, { ...maintenanceData, id: entityId }];
 
-    if (editingMaintenance && editingMaintenance.id > 0) {
-      // Editing existing maintenance record
-      newMaintenanceList = db.maintenance.map(m =>
-        m.id === editingMaintenance.id ? { ...m, ...maintenanceData } : m
-      );
-    } else {
-      // Creating new maintenance record
-      const newId = (db.maintenance.length > 0) ? Math.max(...db.maintenance.map(m => m.id)) + 1 : 1;
-      newMaintenanceList = [...db.maintenance, { ...maintenanceData, id: newId }];
-    }
-
-    updateAndSaveDb({ ...db, maintenance: newMaintenanceList });
+    updateAndSaveDb(withAudit({ ...db, maintenance: newMaintenanceList }, 'maintenance.saved', entityId, `Saved maintenance record for equipment #${maintenanceData.equipmentId}`));
     setIsMaintenanceModalOpen(false);
     setEditingMaintenance(null);
   };
 
   const handleCompleteMaintenance = (maintenanceId: number) => {
     if (!db) return;
-    const updatedMaintenance = db.maintenance.map(m =>
-      m.id === maintenanceId
-        ? { ...m, status: 'Completed' as const, actualReturnDate: new Date().toISOString().split('T')[0] }
-        : m
+    const updatedMaintenance = db.maintenance.map(record =>
+      record.id === maintenanceId
+        ? { ...record, status: 'Completed' as const, actualReturnDate: new Date().toISOString().split('T')[0] }
+        : record
     );
-    updateAndSaveDb({ ...db, maintenance: updatedMaintenance });
+    updateAndSaveDb(withAudit({ ...db, maintenance: updatedMaintenance }, 'maintenance.completed', maintenanceId, `Completed maintenance record #${maintenanceId}`));
   };
 
   const handleEditMaintenance = (maintenance: MaintenanceRecord) => {
@@ -190,7 +202,6 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
     setIsMaintenanceModalOpen(true);
   };
 
-  type View = 'rentals' | 'equipment' | 'clients' | 'settings' | 'maintenance';
   const NavButton = ({ view, label }: { view: View; label: string }) => (
     <button
       onClick={() => setCurrentView(view)}
@@ -202,7 +213,7 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
       {label}
     </button>
   );
-  const selectedClient = db && selectedRental ? db.clients.find(c => c.id === selectedRental.clientId) : null;
+  const selectedClient = db && selectedRental ? db.clients.find(client => client.id === selectedRental.clientId) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-cyan-900 text-white p-0 md:p-4">
@@ -212,7 +223,8 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
             <span className="text-2xl md:text-3xl font-extrabold tracking-tight text-white drop-shadow-lg">Rental Manager</span>
             <span className="hidden md:inline-block px-3 py-1 rounded-full bg-cyan-600/80 text-xs font-semibold ml-2">v{version}</span>
           </div>
-          <nav className="flex gap-2 mt-4 md:mt-0">
+          <nav className="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <NavButton view="dashboard" label={t.dashboard} />
             <NavButton view="rentals" label={t.rentals} />
             <NavButton view="equipment" label={t.equipment} />
             <NavButton view="clients" label={t.clients} />
@@ -226,6 +238,7 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
         {!db && !error && <div className="flex justify-center items-center h-40"><span className="animate-pulse text-cyan-300 text-lg font-medium">{t.loading}</span></div>}
         {db && (
           <div className="transition-all duration-300">
+            {currentView === 'dashboard' && <Dashboard rentals={db.rentals} equipment={db.equipment} maintenance={db.maintenance} auditLog={db.auditLog} />}
             {currentView === 'settings' && <Settings settings={db.settings} onSave={handleSaveSettings} onImport={handleImport} />}
             {currentView === 'equipment' && <div className="mt-6"><Equipment equipment={db.equipment} onAdd={() => { setEditingEquipment(null); setIsEquipmentModalOpen(true); }} onEdit={(item) => { setEditingEquipment(item); setIsEquipmentModalOpen(true); }} onDelete={handleDeleteEquipment} onSendToMaintenance={handleSendToMaintenance} /></div>}
             {currentView === 'clients' && <div className="mt-6"><Clients clients={db.clients} onAdd={() => { setEditingClient(null); setIsClientModalOpen(true); }} onEdit={(client) => { setEditingClient(client); setIsClientModalOpen(true); }} onDelete={handleDeleteClient} /></div>}
@@ -235,7 +248,6 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
         )}
       </main>
 
-      {/* Modals */}
       <div className="no-print">
         <Modal isOpen={isEquipmentModalOpen} onClose={() => setIsEquipmentModalOpen(false)} title={editingEquipment ? t.editEquipment : t.addNewEquipment}>
           <EquipmentForm onSave={handleSaveEquipment} onClose={() => { setIsEquipmentModalOpen(false); setEditingEquipment(null); }} equipmentToEdit={editingEquipment} />
@@ -251,7 +263,6 @@ function AppContent({ db, error, onDbUpdate }: AppContentProps) {
         </Modal>
       </div>
 
-      {/* Ticket Modal */}
       {isTicketModalOpen && selectedRental && selectedClient && db && (
         <div id="print-area">
           <Modal isOpen={isTicketModalOpen} onClose={() => setIsTicketModalOpen(false)} title={`${t.ticketFolio} #${selectedRental.folio}`}>
@@ -279,7 +290,7 @@ function App() {
       });
   }, []);
 
-  const language = db?.settings?.language || 'es';
+  const language = db?.settings?.language || 'en';
 
   return (
     <TranslationProvider language={language}>

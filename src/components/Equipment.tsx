@@ -35,7 +35,11 @@ export function Equipment({ equipment, onAdd, onEdit, onDelete, onSendToMaintena
                 )}
                 {equipment.map((item) => (
                     <div key={item.id} className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg flex flex-col border border-purple-900/20 hover:border-purple-700/40 transition-all duration-200">
-                        <img src={item.imageBase64 || 'https://via.placeholder.com/300x200?text=No+Image'} alt={item.name} className="w-full h-40 object-cover bg-gray-700" />
+                        {item.imageBase64 ? (
+                            <img src={item.imageBase64} alt={item.name} className="w-full h-40 object-cover bg-gray-700" />
+                        ) : (
+                            <div className="w-full h-40 bg-gray-700 flex items-center justify-center text-gray-400 text-sm">{t.image}</div>
+                        )}
                         <div className="p-4 flex-grow flex flex-col">
                             <h3 className="text-lg font-bold text-white mb-3">{item.name}</h3>
                             <div className="text-sm text-gray-300 space-y-2 mb-4 flex-grow">

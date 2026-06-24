@@ -53,7 +53,6 @@ export function EquipmentForm({ onSave, onClose, equipmentToEdit }: EquipmentFor
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Ensure availableStock is set to stock when creating/editing equipment
         const equipmentData = {
             ...formData,
             availableStock: formData.stock

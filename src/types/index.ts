@@ -5,7 +5,7 @@ export interface AppSettings {
   phone: string;
   logoBase64: string;
   nextInvoiceNumber: number;
-  language: "es" | "en";
+  language: "en";
 }
 
 export interface Rental {
@@ -38,7 +38,7 @@ export interface Equipment {
   pricePerHour: number;
   pricePerDay: number;
   stock: number;
-  availableStock: number; // Stock available for rental (excluding maintenance)
+  availableStock: number;
   imageBase64: string;
 }
 
@@ -55,11 +55,28 @@ export interface MaintenanceRecord {
   notes?: string;
 }
 
-// Represents the entire database file structure
+export interface AuditEvent {
+  id: number;
+  type:
+    | "settings.updated"
+    | "equipment.saved"
+    | "equipment.deleted"
+    | "client.saved"
+    | "client.deleted"
+    | "rental.created"
+    | "rental.returned"
+    | "maintenance.saved"
+    | "maintenance.completed";
+  entityId: number;
+  summary: string;
+  createdAt: string;
+}
+
 export interface Database {
   settings: AppSettings;
   clients: Client[];
   equipment: Equipment[];
   rentals: Rental[];
   maintenance: MaintenanceRecord[];
+  auditLog: AuditEvent[];
 }

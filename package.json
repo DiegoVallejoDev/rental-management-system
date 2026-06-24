@@ -3,7 +3,7 @@
   "private": false,
   "version": "1.2.0",
   "type": "module",
-  "description": "A modern, bilingual rental management application built with Tauri, React, and TypeScript for equipment rental businesses",
+  "description": "A modern rental management desktop application built with Tauri, React, and TypeScript for equipment rental businesses",
   "keywords": [
     "rental-management",
     "equipment-rental",
@@ -13,8 +13,6 @@
     "typescript",
     "tailwindcss",
     "desktop-app",
-    "bilingual",
-    "spanish",
     "english",
     "maintenance-tracking",
     "invoice-system"

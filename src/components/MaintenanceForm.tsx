@@ -99,7 +99,6 @@ export function MaintenanceForm({ onSave, onClose, equipment, maintenanceToEdit 
             return;
         }
 
-        // Check if we have enough available stock for maintenance
         const isEditing = maintenanceToEdit && maintenanceToEdit.id > 0;
         const originalQuantity = isEditing ? (maintenanceToEdit.quantity || 0) : 0;
         const availableForThisMaintenance = selectedEquipment.availableStock + originalQuantity;

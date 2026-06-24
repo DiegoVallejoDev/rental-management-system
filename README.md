@@ -2,6 +2,25 @@
 
 A local-first rental management desktop application for equipment rental businesses. It combines inventory control, client records, rental operations, maintenance tracking, backup import/export, and a lightweight operations dashboard.
 
+
+## Screenshots
+
+### Dashboard
+
+![Dashboard showing active rentals, inventory health, and recent audit activity](docs/screenshots/dashboard.png)
+
+### Rentals
+
+![Rentals table showing active and returned rental records](docs/screenshots/rentals.png)
+
+### Equipment
+
+![Equipment inventory cards with availability and maintenance actions](docs/screenshots/equipment.png)
+
+### Maintenance
+
+![Maintenance table showing in-progress and completed maintenance records](docs/screenshots/maintenance.png)
+
 ## Features
 
 ### Dashboard

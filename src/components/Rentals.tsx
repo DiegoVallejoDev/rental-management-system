@@ -1,6 +1,8 @@
 import type { Client, Rental } from '../types';
 import { format, isPast } from 'date-fns';
+import { useMemo } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import { buildClientNameById } from '../domain/selectors';
 import { formatTranslation } from '../utils/translations';
 
 interface RentalsProps {
@@ -13,7 +15,9 @@ interface RentalsProps {
 
 export function Rentals({ rentals, clients, onAdd, onReturn, onViewTicket }: RentalsProps) {
     const { t } = useTranslation();
-    const getClientName = (clientId: number) => clients.find(c => c.id === clientId)?.name || 'Cliente Desconocido';
+    const clientNameById = useMemo(() => buildClientNameById(clients), [clients]);
+    const sortedRentals = useMemo(() => [...rentals].sort((a, b) => b.folio - a.folio), [rentals]);
+    const getClientName = (clientId: number) => clientNameById.get(clientId) || t.unknownClient;
 
     const getStatus = (rental: Rental): { text: string, className: string } => {
         if (rental.status === 'Returned') {
@@ -55,7 +59,7 @@ export function Rentals({ rentals, clients, onAdd, onReturn, onViewTicket }: Ren
                                 <td colSpan={6} className="text-center py-8 text-gray-400 text-lg font-medium bg-gray-900/60">{t.noRentalsYet}</td>
                             </tr>
                         )}
-                        {rentals.sort((a, b) => b.folio - a.folio).map((rental, idx) => {
+                        {sortedRentals.map((rental, idx) => {
                             const status = getStatus(rental);
                             return (
                                 <tr key={rental.id} className={`transition-all duration-150 ${idx % 2 === 0 ? 'bg-gray-900/60' : 'bg-gray-800/60'} border-b border-cyan-900/20 hover:bg-cyan-900/30`}>

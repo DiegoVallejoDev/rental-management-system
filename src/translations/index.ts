@@ -1,7 +1,6 @@
-export type Language = "es" | "en";
+export type Language = "en";
 
 export interface Translations {
-  // Common
   save: string;
   cancel: string;
   edit: string;
@@ -10,14 +9,18 @@ export interface Translations {
   yes: string;
   no: string;
   loading: string;
-
-  // Navigation
+  dashboard: string;
+  activeRentalsMetric: string;
+  overdueRentalsMetric: string;
+  maintenanceUnitsMetric: string;
+  revenueMetric: string;
+  inventoryHealth: string;
+  recentAudit: string;
+  noAuditEvents: string;
   rentals: string;
   equipment: string;
   clients: string;
   settings: string;
-
-  // Rentals
   rentalsTitle: string;
   createNewRental: string;
   folio: string;
@@ -30,8 +33,6 @@ export interface Translations {
   returnRental: string;
   noRentalsYet: string;
   returnConfirmation: string;
-
-  // Equipment
   equipmentTitle: string;
   addNewEquipment: string;
   editEquipment: string;
@@ -45,8 +46,6 @@ export interface Translations {
   deleteEquipmentConfirm: string;
   sendToMaintenance: string;
   returnFromMaintenance: string;
-
-  // Maintenance
   maintenanceTitle: string;
   addMaintenanceRecord: string;
   editMaintenanceRecord: string;
@@ -62,8 +61,6 @@ export interface Translations {
   noMaintenanceYet: string;
   maintenanceConfirmation: string;
   returnMaintenanceConfirmation: string;
-
-  // Clients
   clientsTitle: string;
   addNewClient: string;
   editClient: string;
@@ -77,8 +74,6 @@ export interface Translations {
   noClientsYet: string;
   deleteClientConfirm: string;
   saveClient: string;
-
-  // Settings
   businessConfiguration: string;
   businessName: string;
   nextInvoiceNumber: string;
@@ -88,15 +83,12 @@ export interface Translations {
   dataManagement: string;
   exportBackup: string;
   importBackup: string;
-  language: string;
   settingsSaved: string;
   backupExported: string;
   backupImported: string;
   exportFailed: string;
   importFailed: string;
   importConfirmation: string;
-
-  // Rental Form
   createRental: string;
   selectClient: string;
   selectAClient: string;
@@ -124,19 +116,13 @@ export interface Translations {
   summary: string;
   items: string;
   confirmRental: string;
-
-  // Status
   active: string;
   returned: string;
   overdue: string;
-
-  // Validation messages
   fillRequiredFields: string;
   quantityMustBeGreaterThanZero: string;
   selectValidEquipment: string;
   notEnoughStockForMaintenance: string;
-
-  // Rental Ticket
   close: string;
   printNote: string;
   rentalNote: string;
@@ -151,172 +137,12 @@ export interface Translations {
   termsAndConditions: string;
   clientSignature: string;
   unknownItem: string;
+  unknownClient: string;
   ticketFolio: string;
 }
 
 export const translations: Record<Language, Translations> = {
-  es: {
-    // Common
-    save: "Guardar",
-    cancel: "Cancelar",
-    edit: "Editar",
-    delete: "Eliminar",
-    add: "Agregar",
-    yes: "Sí",
-    no: "No",
-    loading: "Cargando...",
-
-    // Navigation
-    rentals: "Rentas",
-    equipment: "Equipos",
-    clients: "Clientes",
-    settings: "Configuración",
-
-    // Rentals
-    rentalsTitle: "Rentas",
-    createNewRental: "+ Crear Nueva Renta",
-    folio: "Folio",
-    client: "Cliente",
-    returnDate: "Fecha de Devolución",
-    total: "Total",
-    status: "Estado",
-    actions: "Acciones",
-    viewTicket: "Ver Ticket",
-    returnRental: "Devolver",
-    noRentalsYet: "No se han creado rentas aún.",
-    returnConfirmation:
-      "¿Está seguro de que desea devolver la renta #{folio} de {client}? Esto marcará la renta como devuelta y restaurará el inventario del equipo.",
-
-    // Equipment
-    equipmentTitle: "Equipos",
-    addNewEquipment: "+ Agregar Nuevo Equipo",
-    editEquipment: "Editar Equipo",
-    equipmentName: "Nombre del Equipo",
-    pricePerHour: "Precio por Hora",
-    pricePerDay: "Precio por Día",
-    stock: "Inventario",
-    availableStock: "Stock Disponible",
-    image: "Imagen",
-    noEquipmentYet: "No se han agregado equipos aún.",
-    deleteEquipmentConfirm: "¿Está seguro de que desea eliminar este equipo?",
-    sendToMaintenance: "Enviar a Mantenimiento",
-    returnFromMaintenance: "Devolver de Mantenimiento",
-
-    // Maintenance
-    maintenanceTitle: "Mantenimiento",
-    addMaintenanceRecord: "+ Agregar Registro de Mantenimiento",
-    editMaintenanceRecord: "Editar Registro de Mantenimiento",
-    maintenanceReason: "Razón del Mantenimiento",
-    maintenanceQuantity: "Cantidad",
-    maintenanceStartDate: "Fecha de Inicio",
-    expectedReturnDate: "Fecha Esperada de Retorno",
-    actualReturnDate: "Fecha Real de Retorno",
-    maintenanceCost: "Costo de Mantenimiento",
-    maintenanceNotes: "Notas",
-    inMaintenance: "En Mantenimiento",
-    maintenanceCompleted: "Mantenimiento Completado",
-    noMaintenanceYet: "No hay registros de mantenimiento aún.",
-    maintenanceConfirmation:
-      "¿Está seguro de que desea enviar {quantity} unidad(es) de {equipment} a mantenimiento?",
-    returnMaintenanceConfirmation:
-      "¿Está seguro de que desea devolver {quantity} unidad(es) de {equipment} del mantenimiento?",
-
-    // Clients
-    clientsTitle: "Clientes",
-    addNewClient: "+ Agregar Nuevo Cliente",
-    editClient: "Editar Cliente",
-    clientName: "Nombre del Cliente",
-    fullName: "Nombre Completo",
-    phone: "Teléfono",
-    phoneNumber: "Número de Teléfono",
-    address: "Dirección",
-    addressOptional: "Dirección (Opcional)",
-    name: "Nombre",
-    noClientsYet: "No se han agregado clientes aún.",
-    deleteClientConfirm: "¿Está seguro de que desea eliminar este cliente?",
-    saveClient: "Guardar Cliente",
-
-    // Settings
-    businessConfiguration: "Configuración del Negocio",
-    businessName: "Nombre del Negocio",
-    nextInvoiceNumber: "Próximo Número de Factura (Folio)",
-    businessLogo: "Logo del Negocio",
-    logoPreview: "Vista Previa del Logo:",
-    saveSettings: "Guardar Configuración",
-    dataManagement: "Gestión de Datos",
-    exportBackup: "Exportar Respaldo Completo",
-    importBackup: "Importar desde Respaldo",
-    language: "Idioma",
-    settingsSaved: "¡Configuración guardada exitosamente!",
-    backupExported: "¡Respaldo exportado exitosamente!",
-    backupImported: "¡Importación exitosa! La aplicación se recargará ahora.",
-    exportFailed:
-      "Error al exportar respaldo. Asegúrese de que la base de datos exista.",
-    importFailed: "Error al importar respaldo.",
-    importConfirmation:
-      "¿Está seguro? Esto sobrescribirá todos los datos actuales.",
-
-    // Rental Form
-    createRental: "Crear Nueva Renta",
-    selectClient: "Seleccionar Cliente",
-    selectAClient: "Seleccionar un cliente",
-    rentalType: "Tipo de Renta",
-    rentalTypeLabel: "Tipo de Renta",
-    hourly: "Por Hora",
-    daily: "Por Día",
-    byHour: "Por Hora",
-    byDay: "Por Día",
-    startDate: "Fecha de Inicio",
-    startDateTime: "Fecha y Hora de Inicio",
-    returnDateTime: "Fecha y Hora de Devolución",
-    selectEquipment: "Seleccionar Equipo",
-    quantity: "Cantidad",
-    unitPrice: "Precio Unitario",
-    subtotal: "Subtotal",
-    addEquipment: "Agregar Equipo",
-    removeEquipment: "Remover Equipo",
-    step: "Paso",
-    next: "Siguiente",
-    back: "Atrás",
-    available: "Disponible",
-    selected: "Seleccionado",
-    setDatesAndConfirm: "Establecer Fechas y Confirmar",
-    summary: "Resumen",
-    items: "Artículos",
-    confirmRental: "Confirmar Renta",
-
-    // Status
-    active: "Activo",
-    returned: "Devuelto",
-    overdue: "Vencido",
-
-    // Validation messages
-    fillRequiredFields: "Por favor complete todos los campos requeridos",
-    quantityMustBeGreaterThanZero: "La cantidad debe ser mayor que 0",
-    selectValidEquipment: "Por favor seleccione un equipo válido",
-    notEnoughStockForMaintenance:
-      "Solo {availableStock} unidades disponibles para mantenimiento",
-
-    // Rental Ticket
-    close: "Cerrar",
-    printNote: "Imprimir Nota",
-    rentalNote: "NOTA DE RENTA",
-    date: "Fecha",
-    tel: "Tel",
-    qty: "CANT",
-    description: "DESCRIPCIÓN",
-    unitPriceHeader: "PRECIO UNIT",
-    subtotalHeader: "SUBTOTAL",
-    start: "INICIO",
-    return: "DEVOLUCIÓN",
-    termsAndConditions:
-      "Se aplican términos y condiciones. El cliente es responsable de cualquier daño o pérdida del equipo.",
-    clientSignature: "Firma del Cliente",
-    unknownItem: "Artículo Desconocido",
-    ticketFolio: "Ticket Folio",
-  },
   en: {
-    // Common
     save: "Save",
     cancel: "Cancel",
     edit: "Edit",
@@ -325,14 +151,18 @@ export const translations: Record<Language, Translations> = {
     yes: "Yes",
     no: "No",
     loading: "Loading...",
-
-    // Navigation
+    dashboard: "Dashboard",
+    activeRentalsMetric: "Active Rentals",
+    overdueRentalsMetric: "Overdue Rentals",
+    maintenanceUnitsMetric: "Units in Maintenance",
+    revenueMetric: "Total Revenue",
+    inventoryHealth: "Inventory Health",
+    recentAudit: "Recent Activity",
+    noAuditEvents: "No activity has been recorded yet.",
     rentals: "Rentals",
     equipment: "Equipment",
     clients: "Clients",
     settings: "Settings",
-
-    // Rentals
     rentalsTitle: "Rentals",
     createNewRental: "+ Create New Rental",
     folio: "Folio",
@@ -345,9 +175,7 @@ export const translations: Record<Language, Translations> = {
     returnRental: "Return",
     noRentalsYet: "No rentals have been created yet.",
     returnConfirmation:
-      "Are you sure you want to return rental #{folio} for {client}? This will mark the rental as returned and restore the equipment inventory.",
-
-    // Equipment
+      "Return rental #{folio} for {client}? This marks the rental as returned and restores equipment inventory.",
     equipmentTitle: "Equipment",
     addNewEquipment: "+ Add New Equipment",
     editEquipment: "Edit Equipment",
@@ -358,11 +186,9 @@ export const translations: Record<Language, Translations> = {
     availableStock: "Available Stock",
     image: "Image",
     noEquipmentYet: "No equipment has been added yet.",
-    deleteEquipmentConfirm: "Are you sure you want to delete this equipment?",
+    deleteEquipmentConfirm: "Delete this equipment item?",
     sendToMaintenance: "Send to Maintenance",
     returnFromMaintenance: "Return from Maintenance",
-
-    // Maintenance
     maintenanceTitle: "Maintenance",
     addMaintenanceRecord: "+ Add Maintenance Record",
     editMaintenanceRecord: "Edit Maintenance Record",
@@ -375,13 +201,11 @@ export const translations: Record<Language, Translations> = {
     maintenanceNotes: "Notes",
     inMaintenance: "In Maintenance",
     maintenanceCompleted: "Maintenance Completed",
-    noMaintenanceYet: "No maintenance records yet.",
+    noMaintenanceYet: "No maintenance records exist yet.",
     maintenanceConfirmation:
-      "Are you sure you want to send {quantity} unit(s) of {equipment} to maintenance?",
+      "Send {quantity} unit(s) of {equipment} to maintenance?",
     returnMaintenanceConfirmation:
-      "Are you sure you want to return {quantity} unit(s) of {equipment} from maintenance?",
-
-    // Clients
+      "Return {quantity} unit(s) of {equipment} from maintenance?",
     clientsTitle: "Clients",
     addNewClient: "+ Add New Client",
     editClient: "Edit Client",
@@ -393,10 +217,8 @@ export const translations: Record<Language, Translations> = {
     addressOptional: "Address (Optional)",
     name: "Name",
     noClientsYet: "No clients have been added yet.",
-    deleteClientConfirm: "Are you sure you want to delete this client?",
+    deleteClientConfirm: "Delete this client?",
     saveClient: "Save Client",
-
-    // Settings
     businessConfiguration: "Business Configuration",
     businessName: "Business Name",
     nextInvoiceNumber: "Next Invoice Number (Folio)",
@@ -406,15 +228,12 @@ export const translations: Record<Language, Translations> = {
     dataManagement: "Data Management",
     exportBackup: "Export Full Backup",
     importBackup: "Import from Backup",
-    language: "Language",
-    settingsSaved: "Settings saved successfully!",
-    backupExported: "Backup exported successfully!",
-    backupImported: "Import successful! The application will now reload.",
-    exportFailed: "Failed to export backup. Make sure the database exists.",
-    importFailed: "Failed to import backup.",
-    importConfirmation: "Are you sure? This will overwrite all current data.",
-
-    // Rental Form
+    settingsSaved: "Settings saved successfully.",
+    backupExported: "Backup exported successfully.",
+    backupImported: "Import successful. The application will reload now.",
+    exportFailed: "Backup export failed. Confirm that the database exists.",
+    importFailed: "Backup import failed.",
+    importConfirmation: "This will overwrite all current data. Continue?",
     createRental: "Create New Rental",
     selectClient: "Select Client",
     selectAClient: "Select a client",
@@ -442,35 +261,29 @@ export const translations: Record<Language, Translations> = {
     summary: "Summary",
     items: "Items",
     confirmRental: "Confirm Rental",
-
-    // Status
     active: "Active",
     returned: "Returned",
     overdue: "Overdue",
-
-    // Validation messages
-    fillRequiredFields: "Please fill in all required fields",
-    quantityMustBeGreaterThanZero: "Quantity must be greater than 0",
-    selectValidEquipment: "Please select valid equipment",
+    fillRequiredFields: "Fill in all required fields.",
+    quantityMustBeGreaterThanZero: "Quantity must be greater than zero.",
+    selectValidEquipment: "Select valid equipment.",
     notEnoughStockForMaintenance:
-      "Only {availableStock} units available for maintenance",
-
-    // Rental Ticket
+      "Not enough stock available. Available stock: {availableStock}",
     close: "Close",
     printNote: "Print Note",
-    rentalNote: "RENTAL NOTE",
+    rentalNote: "Rental Note",
     date: "Date",
     tel: "Tel",
-    qty: "QTY",
-    description: "DESCRIPTION",
-    unitPriceHeader: "UNIT PRICE",
-    subtotalHeader: "SUBTOTAL",
-    start: "START",
-    return: "RETURN",
-    termsAndConditions:
-      "Terms and conditions apply. Renter is responsible for any damage or loss of equipment.",
+    qty: "Qty",
+    description: "Description",
+    unitPriceHeader: "Unit Price",
+    subtotalHeader: "Subtotal",
+    start: "Start",
+    return: "Return",
+    termsAndConditions: "Terms and Conditions",
     clientSignature: "Client Signature",
     unknownItem: "Unknown Item",
+    unknownClient: "Unknown Client",
     ticketFolio: "Ticket Folio",
   },
 };

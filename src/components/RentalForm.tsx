@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import type { Client, Equipment, Rental } from '../types';
-import { differenceInHours, differenceInCalendarDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import { useTranslation } from '../hooks/useTranslation';
+import { calculateRentalDuration, calculateRentalTotal } from '../domain/rentals';
 
 type RentalFormData = Omit<Rental, 'id' | 'folio' | 'status' | 'total'>;
 type CartItem = { equipment: Equipment; quantity: number };
@@ -22,39 +23,29 @@ export function RentalForm({ clients, equipment, onSave, onClose }: RentalFormPr
     const [startDate, setStartDate] = useState(format(new Date(), "yyyy-MM-dd'T'HH:mm"));
     const [returnDate, setReturnDate] = useState('');
 
+    const cartQuantityByEquipmentId = useMemo(() => {
+        return new Map(cart.map(item => [item.equipment.id, item.quantity]));
+    }, [cart]);
+
     const availableEquipment = useMemo(() => {
         return equipment.filter(e => {
-            const inCart = cart.find(item => item.equipment.id === e.id);
-            const remainingStock = e.stock - (inCart?.quantity || 0);
+            const remainingStock = e.availableStock - (cartQuantityByEquipmentId.get(e.id) || 0);
             return remainingStock > 0;
         });
-    }, [equipment, cart]);
+    }, [equipment, cartQuantityByEquipmentId]);
 
     const total = useMemo(() => {
-        if (!startDate || !returnDate || cart.length === 0) return 0;
-        const start = new Date(startDate);
-        const end = new Date(returnDate);
-        if (end <= start) return 0;
-
-        let duration = 0;
-        if (rentalType === 'Hour') {
-            duration = differenceInHours(end, start);
-        } else {
-            duration = differenceInCalendarDays(end, start) + 1; // inclusive of start and end day
-        }
-        duration = Math.max(1, duration);
-
-        return cart.reduce((acc, item) => {
-            const price = rentalType === 'Hour' ? item.equipment.pricePerHour : item.equipment.pricePerDay;
-            return acc + (price * item.quantity * duration);
-        }, 0);
+        return calculateRentalTotal(cart, rentalType, startDate, returnDate);
     }, [cart, rentalType, startDate, returnDate]);
+    const duration = useMemo(() => {
+        return calculateRentalDuration(rentalType, startDate, returnDate);
+    }, [rentalType, returnDate, startDate]);
 
     const addToCart = (item: Equipment) => {
         setCart(prev => {
             const existing = prev.find(i => i.equipment.id === item.id);
             if (existing) {
-                if (existing.quantity < item.stock) {
+                if (existing.quantity < item.availableStock) {
                     return prev.map(i => i.equipment.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
                 }
                 return prev;
@@ -73,19 +64,21 @@ export function RentalForm({ clients, equipment, onSave, onClose }: RentalFormPr
             rentalType,
             startDate: new Date(startDate).toISOString(),
             returnDate: new Date(returnDate).toISOString(),
-            details: cart.map(item => ({
-                equipmentId: item.equipment.id,
-                quantity: item.quantity,
-                unitPrice: rentalType === 'Hour' ? item.equipment.pricePerHour : item.equipment.pricePerDay,
-                subtotal: 0 // Will be calculated again on display if needed
-            }))
+            details: cart.map(item => {
+                const unitPrice = rentalType === 'Hour' ? item.equipment.pricePerHour : item.equipment.pricePerDay;
+                return {
+                    equipmentId: item.equipment.id,
+                    quantity: item.quantity,
+                    unitPrice,
+                    subtotal: unitPrice * item.quantity * duration
+                };
+            })
         };
         onSave(rentalData, total);
     };
 
     return (
         <div>
-            {/* Step 1: Client and Type */}
             {step === 1 && (
                 <div className="space-y-4">
                     <h3 className="font-bold text-lg">{t.step} 1: {t.selectClient} {t.rentalTypeLabel}</h3>
@@ -109,22 +102,19 @@ export function RentalForm({ clients, equipment, onSave, onClose }: RentalFormPr
                 </div>
             )}
 
-            {/* Step 2: Select Equipment */}
             {step === 2 && (
                 <div className="space-y-4">
                     <h3 className="font-bold text-lg">{t.step} 2: {t.selectEquipment}</h3>
                     <div className="grid grid-cols-2 gap-4 max-h-96">
-                        {/* Left: Available Equipment */}
                         <div className="space-y-2 overflow-y-auto pr-2">
                             <h4 className="font-semibold">{t.available}</h4>
                             {availableEquipment.map(e => (
                                 <div key={e.id} className="bg-gray-800 p-2 rounded-md flex justify-between items-center">
-                                    <span>{e.name} <span className="text-xs text-gray-400">({t.stock}: {e.stock})</span></span>
+                                    <span>{e.name} <span className="text-xs text-gray-400">({t.available}: {e.availableStock})</span></span>
                                     <button onClick={() => addToCart(e)} className="bg-green-600 text-xs px-2 py-1 rounded-md">+</button>
                                 </div>
                             ))}
                         </div>
-                        {/* Right: Cart */}
                         <div className="space-y-2 overflow-y-auto pr-2">
                             <h4 className="font-semibold">{t.selected}</h4>
                             {cart.map(item => (
@@ -142,7 +132,6 @@ export function RentalForm({ clients, equipment, onSave, onClose }: RentalFormPr
                 </div>
             )}
 
-            {/* Step 3: Dates and Confirmation */}
             {step === 3 && (
                 <div className="space-y-4">
                     <h3 className="font-bold text-lg">{t.step} 3: {t.setDatesAndConfirm}</h3>

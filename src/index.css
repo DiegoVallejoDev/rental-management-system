@@ -1,9 +1,6 @@
 @import "tailwindcss";
 
-
 @media print {
-
-    /* Hide everything except the ticket and its content */
     body * {
         visibility: hidden;
     }
@@ -20,7 +17,6 @@
         width: 100%;
     }
 
-    /* Hide the print/close buttons on the ticket itself */
     .no-print {
         display: none !important;
     }

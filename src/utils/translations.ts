@@ -1,4 +1,3 @@
-// Helper function to replace placeholders in translations
 export function formatTranslation(
   text: string,
   replacements: Record<string, string | number>

@@ -1,6 +1,9 @@
 import type { AppSettings, Client, Equipment, Rental } from '../types';
 import { format } from 'date-fns';
+import { useMemo } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import { buildEquipmentById } from '../domain/selectors';
+import { calculateRentalDuration } from '../domain/rentals';
 
 interface RentalTicketProps {
     rental: Rental;
@@ -12,7 +15,12 @@ interface RentalTicketProps {
 
 export function RentalTicket({ rental, settings, client, equipmentList, onClose }: RentalTicketProps) {
     const { t } = useTranslation();
-    const getEquipmentName = (id: number) => equipmentList.find(e => e.id === id)?.name || t.unknownItem;
+    const equipmentById = useMemo(() => buildEquipmentById(equipmentList), [equipmentList]);
+    const duration = useMemo(
+        () => calculateRentalDuration(rental.rentalType, rental.startDate, rental.returnDate),
+        [rental.rentalType, rental.returnDate, rental.startDate]
+    );
+    const getEquipmentName = (id: number) => equipmentById.get(id)?.name || t.unknownItem;
 
     return (
         <div className="bg-gray-900 text-white p-4 max-h-[90vh] flex flex-col">
@@ -22,7 +30,6 @@ export function RentalTicket({ rental, settings, client, equipmentList, onClose 
             </div>
 
             <div id="ticket" className="bg-white text-black p-6 rounded-md overflow-y-auto">
-                {/* Header */}
                 <header className="flex flex-col items-center text-center border-b-2 border-dashed border-gray-400 pb-4">
                     {settings.logoBase64 && <img src={settings.logoBase64} alt="Business Logo" className="max-h-20 mb-4" />}
                     <h1 className="text-2xl font-bold">{settings.businessName}</h1>
@@ -30,7 +37,6 @@ export function RentalTicket({ rental, settings, client, equipmentList, onClose 
                     <p className="text-sm">Tel: {settings.phone}</p>
                 </header>
 
-                {/* Info Section */}
                 <section className="grid grid-cols-2 gap-4 my-4 text-sm">
                     <div>
                         <h2 className="font-bold">{t.rentalNote}</h2>
@@ -44,7 +50,6 @@ export function RentalTicket({ rental, settings, client, equipmentList, onClose 
                     </div>
                 </section>
 
-                {/* Details Table */}
                 <section className="my-4">
                     <table className="w-full text-sm">
                         <thead className="border-b-2 border-black">
@@ -57,9 +62,6 @@ export function RentalTicket({ rental, settings, client, equipmentList, onClose 
                         </thead>
                         <tbody>
                             {rental.details.map((item, index) => {
-                                const duration = rental.rentalType === 'Hour'
-                                    ? Math.max(1, Math.ceil((new Date(rental.returnDate).getTime() - new Date(rental.startDate).getTime()) / (1000 * 60 * 60)))
-                                    : Math.max(1, Math.ceil((new Date(rental.returnDate).getTime() - new Date(rental.startDate).getTime()) / (1000 * 60 * 60 * 24)));
                                 const subtotal = item.unitPrice * item.quantity * duration;
                                 return (
                                     <tr key={index} className="border-b border-gray-300">
@@ -74,7 +76,6 @@ export function RentalTicket({ rental, settings, client, equipmentList, onClose 
                     </table>
                 </section>
 
-                {/* Summary and Total */}
                 <section className="flex justify-end my-4">
                     <div className="w-1/2 text-sm">
                         <div className="flex justify-between">
@@ -92,7 +93,6 @@ export function RentalTicket({ rental, settings, client, equipmentList, onClose 
                     </div>
                 </section>
 
-                {/* Footer */}
                 <footer className="border-t-2 border-dashed border-gray-400 pt-4 mt-8 text-center text-xs">
                     <p className="mb-8">{t.termsAndConditions}</p>
                     <div className="w-4/5 h-px bg-gray-400 mx-auto"></div>

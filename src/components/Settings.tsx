@@ -26,7 +26,7 @@ export function Settings({ settings, onSave, onImport }: SettingsProps) {
         setTimeout(() => setMessage({ text: '', type: '' }), 4000);
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -47,7 +47,7 @@ export function Settings({ settings, onSave, onImport }: SettingsProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await onSave({ ...formData, language: 'en' });
+        await onSave(formData);
         showMessage(t.settingsSaved, 'success');
     };
 
@@ -106,6 +106,20 @@ export function Settings({ settings, onSave, onImport }: SettingsProps) {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label htmlFor="language" className="block text-sm font-medium text-gray-300 mb-1">{t.language}</label>
+                        <select
+                            name="language"
+                            id="language"
+                            value={formData.language}
+                            onChange={handleInputChange}
+                            className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:ring-cyan-500 focus:border-cyan-500"
+                        >
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label htmlFor="businessName" className="block text-sm font-medium text-gray-300 mb-1">{t.businessName}</label>
                         <input

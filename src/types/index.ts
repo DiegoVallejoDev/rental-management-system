@@ -5,7 +5,7 @@ export interface AppSettings {
   phone: string;
   logoBase64: string;
   nextInvoiceNumber: number;
-  language: "en";
+  language: "en" | "es";
 }
 
 export interface Rental {

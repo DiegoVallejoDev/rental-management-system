@@ -5,6 +5,7 @@ import {
   writeTextFile,
 } from "@tauri-apps/plugin-fs";
 import { applyAvailableStock } from "../domain/selectors";
+import type { Language } from "../translations";
 import type { Database, Equipment } from "../types";
 
 const DB_FILE_NAME = "database.json";
@@ -15,6 +16,7 @@ const DB_LOCATIONS = [
 ] as const;
 
 function ensureDatabaseStructure(data: Partial<Database>): Database {
+  const validLanguage = (data.settings?.language as Language) || "en";
   return applyAvailableStock({
     settings: {
       id: 1,
@@ -23,7 +25,7 @@ function ensureDatabaseStructure(data: Partial<Database>): Database {
       phone: data.settings?.phone || "",
       logoBase64: data.settings?.logoBase64 || "",
       nextInvoiceNumber: data.settings?.nextInvoiceNumber || 1001,
-      language: "en",
+      language: validLanguage === "en" || validLanguage === "es" ? validLanguage : "en",
     },
     clients: data.clients || [],
     equipment: (data.equipment || []).map((eq: Partial<Equipment>) => ({
